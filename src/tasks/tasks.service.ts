@@ -35,32 +35,33 @@ export class TasksService {
 
     const { status, search } = getTasksFilteredDto;
 
-    if (status) {
-      tasks = tasks.filter((task) => task.status === status);
-    }
+    tasks = tasks.filter((task) => {
+      if (!!status && task.status !== status) {
+        return false;
+      }
 
-    if (search) {
-      tasks = tasks.filter(
-        (task) =>
-          task.title.includes(search) || task.description.includes(search),
-      );
-    }
+      if (
+        !!search &&
+        !task.title.includes(search) &&
+        !task.description.includes(search)
+      ) {
+        return false;
+      }
+
+      return true;
+    });
 
     return tasks;
   }
 
   findOne(id: string) {
-    const task = this.tasks.find((task) => task.id === id);
+    const taskIndex = this.findTaskIndexById(id);
 
-    if (!task) throw new NotFoundException();
-
-    return task;
+    return { ...this.tasks[taskIndex] };
   }
 
   update(id: string, updateTaskDto: UpdateTaskDto) {
-    const taskIndex = this.tasks.findIndex((task) => task.id === id);
-
-    if (taskIndex === -1) throw new NotFoundException();
+    const taskIndex = this.findTaskIndexById(id);
 
     Object.assign(this.tasks[taskIndex], updateTaskDto);
   }
@@ -70,10 +71,16 @@ export class TasksService {
   }
 
   remove(id: string) {
+    const taskIndex = this.findTaskIndexById(id);
+
+    this.tasks.splice(taskIndex, 1);
+  }
+
+  private findTaskIndexById(id: string) {
     const taskIndex = this.tasks.findIndex((task) => task.id === id);
 
     if (taskIndex === -1) throw new NotFoundException();
 
-    this.tasks.splice(taskIndex, 1);
+    return taskIndex;
   }
 }
