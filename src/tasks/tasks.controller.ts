@@ -30,12 +30,7 @@ export class TasksController {
   }
 
   @Get()
-  findAll() {
-    return this.tasksService.findAll();
-  }
-
-  @Get()
-  findTasks(@Query() getTasksFilteredDto: GetTasksFilteredDto) {
+  findTasks(@Query(ValidationPipe) getTasksFilteredDto: GetTasksFilteredDto) {
     return this.tasksService.findTasks(getTasksFilteredDto);
   }
 
