@@ -1,4 +1,4 @@
-import { EntityRepository, FindConditions, Like, Repository } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 
 import { Task, TaskStatus } from '../entities/task.entity';
 import { CreateTaskDto } from '../dto/create-task.dto';
