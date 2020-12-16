@@ -14,12 +14,16 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { User } from 'src/auth/entities/user.entity';
+
+import { TaskStatus } from './entities/task.entity';
 import { TasksService } from './tasks.service';
+import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe';
+
 import { GetTasksFilteredDto } from './dto/get-tasks-filtered.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { TaskStatus } from './entities/task.entity';
-import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
@@ -27,37 +31,37 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  @UsePipes(ValidationPipe)
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(createTaskDto);
+  create(
+    @Body(ValidationPipe) createTaskDto: CreateTaskDto,
+    @GetUser() user: User,
+  ) {
+    return this.tasksService.create(createTaskDto, user);
   }
 
   @Get()
-  findTasks(@Query(ValidationPipe) getTasksFilteredDto: GetTasksFilteredDto) {
-    return this.tasksService.findTasks(getTasksFilteredDto);
+  findTasks(
+    @Query(ValidationPipe) getTasksFilteredDto: GetTasksFilteredDto,
+    @GetUser() user: User,
+  ) {
+    return this.tasksService.findTasks(getTasksFilteredDto, user);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(id);
-  }
-
-  @Put(':id')
-  @UsePipes(ValidationPipe)
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(id, updateTaskDto);
+  findOne(@Param('id') id: string, @GetUser() user: User) {
+    return this.tasksService.findOne(id, user);
   }
 
   @Patch(':id/status')
   updateStatus(
     @Param('id') id: string,
     @Body('status', TaskStatusValidationPipe) status: TaskStatus,
+    @GetUser() user: User,
   ) {
-    return this.tasksService.updateStatus(id, status);
+    return this.tasksService.updateStatus(id, status, user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tasksService.remove(id);
+  remove(@Param('id') id: string, @GetUser() user: User) {
+    return this.tasksService.remove(id, user);
   }
 }

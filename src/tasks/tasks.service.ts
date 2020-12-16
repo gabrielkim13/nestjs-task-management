@@ -1,52 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { User } from 'src/auth/entities/user.entity';
+
 import { TasksRepository } from './repositories/tasks.repository';
 import { TaskStatus } from './entities/task.entity';
 
 import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
 import { GetTasksFilteredDto } from './dto/get-tasks-filtered.dto';
 
 @Injectable()
 export class TasksService {
   constructor(private readonly tasksRepository: TasksRepository) {}
 
-  create(createTaskDto: CreateTaskDto) {
-    return this.tasksRepository.createTask(createTaskDto);
+  create(createTaskDto: CreateTaskDto, user: User) {
+    return this.tasksRepository.createTask(createTaskDto, user);
   }
 
-  findAll() {
-    return this.tasksRepository.find();
+  findTasks(getTasksFilteredDto: GetTasksFilteredDto, user: User) {
+    return this.tasksRepository.findTasksFiltered(getTasksFilteredDto, user);
   }
 
-  findTasks(getTasksFilteredDto: GetTasksFilteredDto) {
-    return this.tasksRepository.findTasksFiltered(getTasksFilteredDto);
-  }
-
-  async findOne(id: string) {
-    const task = await this.tasksRepository.findOne(id);
+  async findOne(id: string, user: User) {
+    const task = await this.tasksRepository.findOne({ id, userId: user.id });
 
     if (!task) throw new NotFoundException();
 
     return task;
   }
 
-  async update(id: string, updateTaskDto: UpdateTaskDto) {
-    const task = await this.tasksRepository.findOne(id);
+  async updateStatus(id: string, status: TaskStatus, user: User) {
+    const task = await this.tasksRepository.findOne({ id, userId: user.id });
 
     if (!task) throw new NotFoundException();
 
-    Object.assign(task, updateTaskDto);
+    task.status = status;
 
     await this.tasksRepository.save(task);
   }
 
-  async updateStatus(id: string, status: TaskStatus) {
-    await this.update(id, { status });
-  }
-
-  async remove(id: string) {
-    const deleteResult = await this.tasksRepository.delete(id);
+  async remove(id: string, user: User) {
+    const deleteResult = await this.tasksRepository.delete({
+      id,
+      userId: user.id,
+    });
 
     if (deleteResult.affected === 0) throw new NotFoundException();
   }

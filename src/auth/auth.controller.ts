@@ -26,10 +26,4 @@ export class AuthController {
   signin(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto) {
     return this.authService.signin(authCredentialsDto);
   }
-
-  @Get('/test')
-  @UseGuards(AuthGuard())
-  test(@GetUser() user) {
-    console.log(user);
-  }
 }

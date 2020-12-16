@@ -1,4 +1,12 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+
+import { User } from 'src/auth/entities/user.entity';
 
 export enum TaskStatus {
   OPEN = 'OPEN',
@@ -19,4 +27,10 @@ export class Task extends BaseEntity {
 
   @Column()
   status: TaskStatus;
+
+  @ManyToOne(() => User, (user) => user.tasks)
+  user: User;
+
+  @Column()
+  userId: string;
 }
